@@ -9,6 +9,9 @@ Events Table:
 
 <img width="589" alt="image" src="https://github.com/Sums1764/Olympic-Medals/assets/150422996/581212ed-726f-46a3-8396-f88c3de6d0e2">
 
+Athletes Table:
+
+<img width="390" alt="image" src="https://github.com/Sums1764/Olympic-Medals/assets/150422996/942f5a37-212b-4ecd-be67-2b18977ba13d">
 
 
 
