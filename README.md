@@ -1,6 +1,8 @@
 # Olympic-Medals
-This Project contains two data sets related to Olympics,
+This Project contains two data sets related to Olympics
+
 Athletes and Events excel workbooks.
+
 Athlete_ID column in Events workbook, ID Column in Athletes workbook columns are used to create relationship between the tables
 
 To give an overview on how the data looks in this sheets, used the top clause and retrieved the top 10 records from both the tables:
