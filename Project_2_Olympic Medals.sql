@@ -1,0 +1,157 @@
+select top 2 * from events;
+select top 2 * from Athletes;
+
+
+
+--- Question No.1:which team has won the maximum gold medals over the years.
+select top 1 team, 
+	count(medal) as gold_medals
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal='Gold'
+group by team
+order by gold_medals desc;
+
+--- Question No.2:for each team print total silver medals and year in which they won maximum silver medal..output 3 columns
+-- team,total_silver_medals, year_of_max_silver
+--:First_Way
+
+With CTE1 as(
+select team,year,
+	count(medal) as silver_medals
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal='Silver'
+group by team, year)
+
+,CTE2 as(
+Select team, max(silver_medals) as max_medals from CTE1
+group by team)
+
+Select C1.team, max(case when silver_medals=max_medals then year end) as year_of_max_silver, sum(silver_medals) as total_medals
+from CTE1 as C1
+inner join CTE2 as C2
+on C1.team = C2.team
+group by C1.team
+order by total_medals desc;
+
+
+-- Second way
+With CTE1 as(
+select team,year,
+	count(medal) as silver_medals
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal='Silver'
+group by team, year)
+, CTE2 as(
+Select *,
+row_number() over(partition by team order by silver_medals desc) as rn
+from CTE1)
+Select team, max(case when rn=1 then year end) as Year_of_Max_Silver, sum(silver_medals) as TotalSilver_Medals
+from CTE2
+group by team
+order by TotalSilver_Medals desc
+
+--3 which player has won maximum gold medals  amongst the players 
+--which have won only gold medal (never won silver or bronze) over the years
+
+With CTE1 as(
+select Name, 
+	count(case when medal='gold' then medal end) as 'Gold_Medal_Cnt',
+	count(case when medal='Silver' then medal end) as 'Silver_Medal_Cnt',
+	count(case when medal='Bronze' then medal end) as 'Bronze_Medal_Cnt'
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+group by name)
+,CTE2 as(
+Select *, 
+row_number() over(order by gold_medal_cnt desc) as rn
+from CTE1
+where Silver_Medal_Cnt=0 and Bronze_Medal_Cnt=0 and Gold_Medal_Cnt>=1)
+Select Name, Gold_medal_cnt
+from CTE2
+where rn=1
+
+
+--4 in each year which player has won maximum gold medal . Write a query to print year,player name 
+--and no of golds won in that year . In case of a tie print comma separated player names.
+
+With CTE1 as
+(Select Year,Name,
+	count(medal) as total_medals
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal='gold'
+group by year,name)
+,CTE2 as(
+Select *,
+Rank()over(partition by year order by total_medals desc) as rnk
+from CTE1)
+Select Year,STRING_AGG(Name,',') as Player_Names, total_medals from CTE2
+where rnk=1
+group by year,total_medals
+order by year
+
+
+--5 in which event and year India has won its first gold medal,first silver medal and first bronze medal
+--print 3 columns medal,year,sport
+
+
+With CTE1 as (
+Select Year,event,medal 
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal<>'NA' and team='India'
+group by year,event,medal)
+, CTE2 as(
+Select *,
+Rank() over(partition by medal  order by year) as rank_1
+from CTE1)
+Select * from CTE2
+where rank_1=1
+
+--6 find players who won gold medal in summer and winter olympics both.
+select name as playername, count(medal) as total_medals
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal='gold'
+group by name
+having count(distinct season)=2
+
+--7 find players who won gold, silver and bronze medal in a single olympics. print player name along with year.
+select year, name as player_name
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where medal<>'NA'
+group by year, name
+having count(distinct medal)=3
+
+
+--8 find players who have won gold medals in consecutive 3 summer olympics in the same event . Consider only olympics 2000 onwards. 
+--Assume summer olympics happens every 4 year starting 2000. print player name and event name.
+
+With CTE1 as(
+Select Name as Player_Name, event, year
+from events E
+inner join Athletes AT
+on E.athlete_id=AT.id
+where year>=2000 and medal='gold' and season='Summer'
+group by name,event, year)
+, CTE2 as(
+Select *,
+lag(year,1)over(partition by player_name,event order by year) as lagg,
+lead(year,1) over(partition by player_name,event order by year) as leadd
+from CTE1)
+Select *
+from CTE2
+where year=lagg+4 and year=leadd-4
+order by Player_Name
