@@ -78,6 +78,20 @@ from CTE2
 where rn=1
 
 
+--- alternate method:
+Select Top 1 Name, count(medal) as mdl_cnt
+from Athletes A
+Inner join events E 
+on A.id = E.athlete_id
+group by name
+having count(distinct medal) = 1 and max(medal) = 'gold'
+order by mdl_cnt desc
+
+
+
+
+
+
 --4 in each year which player has won maximum gold medal . Write a query to print year,player name 
 --and no of golds won in that year . In case of a tie print comma separated player names.
 
