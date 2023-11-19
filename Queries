@@ -15,7 +15,7 @@ order by gold_medals desc;
 
 --- Question No.2:for each team print total silver medals and year in which they won maximum silver medal..output 3 columns
 -- team,total_silver_medals, year_of_max_silver
---:First_Way
+
 
 With CTE1 as(
 select team,year,
@@ -37,8 +37,8 @@ on C1.team = C2.team
 group by C1.team
 order by total_medals desc;
 
+--Alternatively:
 
--- Second way
 With CTE1 as(
 select team,year,
 	count(medal) as silver_medals
@@ -55,6 +55,8 @@ Select team, max(case when rn=1 then year end) as Year_of_Max_Silver, sum(silver
 from CTE2
 group by team
 order by TotalSilver_Medals desc
+
+
 
 --3 which player has won maximum gold medals  amongst the players 
 --which have won only gold medal (never won silver or bronze) over the years
